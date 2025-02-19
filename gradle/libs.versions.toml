@@ -2,6 +2,7 @@
 accompanistNavigationAnimationVersion = "0.31.2-alpha"
 accompanistSystemuicontrollerVersion = "0.24.13-rc"
 agp = "8.7.3"
+converterMoshiVersion = "2.9.0"
 desugar_jdk_libs_nio = "2.1.4"
 coilCompose = "3.0.4"
 kotlin = "2.0.21"
@@ -15,6 +16,7 @@ composeBom = "2024.04.01"
 kizitonwose = "2.6.1"
 materialIconsExtended = "<1.5.0-beta01>"
 navigationCompose = "2.8.5"
+retrofitVersion = "2.9.0"
 room = "2.6.1"
 ksp = "2.0.21-1.0.28"
 firebase-bom = "32.5.0"
@@ -33,6 +35,7 @@ androidx-room = { group = "androidx.room", name = "room-runtime", version.ref = 
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 accompanist-navigation-animation = { module = "com.google.accompanist:accompanist-navigation-animation" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+converter-moshi = { module = "com.squareup.retrofit2:converter-moshi", version.ref = "converterMoshiVersion" }
 desugar_jdk_libs_nio-v214 = { module = "com.android.tools:desugar_jdk_libs_nio", version.ref = "desugar_jdk_libs_nio" }
 androidx-material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "materialIconsExtended" }
 androidx-navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "navigationCompose" }
@@ -63,6 +66,9 @@ androidx-runtime-livedata = { group = "androidx.compose.runtime", name = "runtim
 androidx-credentials = { group = "androidx.credentials", name = "credentials", version.ref = "credentialsVersion" }
 googleid = { group = "com.google.android.libraries.identity.googleid", name = "googleid", version.ref = "googleidVersion" }
 androidx-foundation-android = { group = "androidx.compose.foundation", name = "foundation-android", version.ref = "foundationAndroidVersion" }
+
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofitVersion" }
+
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
