@@ -35,9 +35,13 @@ import java.time.format.TextStyle
 import java.util.Locale
 
 @Composable
-fun Day(day: CalendarDay, isSelected: Boolean, hasEvent: Boolean, onClick: (CalendarDay) -> Unit) {
+fun Day(day: CalendarDay, isSelected: Boolean, isHoliday: Boolean, hasEvent: Boolean, onClick: (CalendarDay) -> Unit) {
     val backgroundColor by animateColorAsState(
-        targetValue = if (isSelected) MaterialTheme.colorScheme.primary else if ( hasEvent ) MaterialTheme.colorScheme.secondary else Color.Transparent,
+        targetValue = if (isSelected) MaterialTheme.colorScheme.primary
+                        else if ( hasEvent ) MaterialTheme.colorScheme.secondary
+                        else if ( isHoliday ) MaterialTheme.colorScheme.onTertiary
+                        else Color.Transparent,
+
         label = "background-animation"
     )
 

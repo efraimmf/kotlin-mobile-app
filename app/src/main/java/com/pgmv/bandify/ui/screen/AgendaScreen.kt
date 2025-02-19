@@ -35,11 +35,12 @@ import com.kizitonwose.calendar.compose.HorizontalCalendar
 import com.kizitonwose.calendar.compose.rememberCalendarState
 import com.kizitonwose.calendar.core.CalendarDay
 import com.kizitonwose.calendar.core.daysOfWeek
+import com.pgmv.bandify.api.response.Holiday
 import com.pgmv.bandify.database.DatabaseHelper
 import com.pgmv.bandify.domain.Event
+import com.pgmv.bandify.ui.components.AgendaEventCard
 import com.pgmv.bandify.ui.components.Day
 import com.pgmv.bandify.ui.components.DaysOfWeekTitle
-import com.pgmv.bandify.ui.components.AgendaEventCard
 import com.pgmv.bandify.ui.components.MonthTitle
 import com.pgmv.bandify.viewmodel.AgendaViewModel
 import com.pgmv.bandify.viewmodel.AgendaViewModelFactory
@@ -67,6 +68,8 @@ fun AgendaScreen(dbHelper: DatabaseHelper, navController: NavController) {
         firstDayOfWeek = daysOfWeek().first()
     )
 
+    val holidays = agendaViewModel.fetchHolidays(state.lastVisibleMonth.yearMonth.year)
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -76,7 +79,7 @@ fun AgendaScreen(dbHelper: DatabaseHelper, navController: NavController) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
 
-        CalendarSection(state, selectedDay, events)
+        CalendarSection(state, selectedDay, holidays, events)
         Button(
             onClick = {
                 navController.navigate("novo_evento")
@@ -98,6 +101,18 @@ fun AgendaScreen(dbHelper: DatabaseHelper, navController: NavController) {
         if (selectedDay.value != null) {
             val selectedDate = selectedDay.value!!.date
             val dayEvents = events.filter { it.date == selectedDate.toString() }
+            val dayHolidays = holidays.filter { it.date == selectedDate.toString() }
+
+            if (dayHolidays.isNotEmpty()) {
+                dayHolidays.forEach {
+                    Text(
+                        text = it.name,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onBackground,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
+                }
+            }
 
             if (dayEvents.isNotEmpty()) {
                 dayEvents.forEach {
@@ -134,6 +149,7 @@ fun AgendaScreen(dbHelper: DatabaseHelper, navController: NavController) {
 fun CalendarSection(
     state: CalendarState,
     selectedDay: MutableState<CalendarDay?>,
+    holidays: List<Holiday>,
     events: List<Event>,
 ) {
 
@@ -165,6 +181,7 @@ fun CalendarSection(
                 Day(
                     day = day,
                     isSelected = selectedDay.value == day,
+                    isHoliday = holidays.any { it.date == day.date.toString() },
                     hasEvent = events.any { it.date == day.date.toString() },
                     onClick = { selectedDay.value = day }
                 )
