@@ -103,12 +103,7 @@ class EventViewModel(private val dbHelper: DatabaseHelper) : ViewModel() {
         timeError.value = null
     }
 
-    fun resetSuccess() {
-        saveEventResult.value = null
-    }
-
-
-    fun saveEvent() {
+     fun saveEvent() {
        viewModelScope.launch {
             try {
                 val eventId = eventDao.insertEvent(
