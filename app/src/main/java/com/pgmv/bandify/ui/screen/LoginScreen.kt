@@ -21,13 +21,30 @@ import androidx.navigation.NavHostController
 import com.pgmv.bandify.R
 import com.pgmv.bandify.viewmodel.AuthenticationViewModel
 import com.pgmv.bandify.viewmodel.UserViewModel
+import android.content.Context
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.filled.Logout
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.GoogleAuthProvider
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 
 @Composable
 fun LoginScreen(
     authenticationViewModel: AuthenticationViewModel,
     navController: NavHostController,
-    userViewModel: UserViewModel
+    userViewModel: UserViewModel,
+
 ) {
     val email = authenticationViewModel.email
     val password = authenticationViewModel.password
@@ -36,6 +53,27 @@ fun LoginScreen(
     var visiblePassword by remember { mutableStateOf(false) }
     val loginError = authenticationViewModel.loginError
 
+    val context = LocalContext.current
+    val auth = FirebaseAuth.getInstance()
+    val googleSignInClient = getGoogleSignInClient(context)
+
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        if (task.isSuccessful) {
+            val account = task.result
+            val credential = GoogleAuthProvider.getCredential(account.idToken, null)
+            auth.signInWithCredential(credential).addOnCompleteListener { task ->
+                if (task.isSuccessful) {
+                    navController.navigate("home") {
+                        popUpTo("login") { inclusive = true }
+                    }
+                }
+            }
+        }
+    }
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -112,6 +150,13 @@ fun LoginScreen(
             onClick = {
                 authenticationViewModel.login(
                     onSuccess = {
+                        val context = navController.context
+                        val sharedPreferences =
+                            context.getSharedPreferences("user_prefs", 0)
+                        authenticationViewModel.loggedInUserId?.let { it1 ->
+                            sharedPreferences.edit().putLong("user_id", it1).apply()
+                        }
+
                         userViewModel.userId = authenticationViewModel.loggedInUserId
                         navController.navigate("home") {
                             popUpTo("login") { inclusive = true }
@@ -141,5 +186,50 @@ fun LoginScreen(
                 color = MaterialTheme.colorScheme.primary,
             )
         }
+        Button(
+            onClick = {
+                val signInIntent = googleSignInClient.signInIntent;
+                launcher.launch(signInIntent);
+            },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 50.dp, vertical = 16.dp)
+                .height(50.dp)
+                .border(1.dp, Color.Black, RoundedCornerShape(50)),
+            shape = RoundedCornerShape(50),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.White,
+                contentColor = Color.Black
+            )
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Image(
+                    painter = painterResource(id = R.drawable.google_icon),
+                    contentDescription = "Google Logo",
+                    modifier = Modifier
+                        .size(30.dp)
+                        .padding(end = 8.dp)
+                );
+                Text(
+                    text = "Fazer Login com Google",
+                    fontSize = 16.sp,
+                    style = MaterialTheme.typography.bodyMedium
+                );
+            }
+        }
     }
 }
+
+    fun getGoogleSignInClient(context: Context): GoogleSignInClient {
+    val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+        .requestIdToken("351674972226-1hut8i6q4iv6q6cpoa5aa2b5eccaae5n.apps.googleusercontent.com") // Substitua pelo seu ID de cliente do Firebase
+        .requestEmail()
+        .build()
+    return GoogleSignIn.getClient(context, gso)
+}
+
+
+

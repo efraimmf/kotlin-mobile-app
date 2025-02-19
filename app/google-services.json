@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "351674972226",
+    "project_id": "bandify-84e50",
+    "storage_bucket": "bandify-84e50.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:351674972226:android:020fad962459cd028655db",
+        "android_client_info": {
+          "package_name": "com.pgmv.bandify"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "351674972226-1hut8i6q4iv6q6cpoa5aa2b5eccaae5n.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC-AwFunz-ZaQ57hFKsI_A93xe1FWYlfVs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "351674972226-1hut8i6q4iv6q6cpoa5aa2b5eccaae5n.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
