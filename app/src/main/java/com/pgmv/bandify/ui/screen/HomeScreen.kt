@@ -49,6 +49,7 @@ fun HomeScreen(dbHelper: DatabaseHelper? = null, navController: NavController) {
                 text = "Próximos eventos",
                 style = MaterialTheme.typography.titleLarge
             )
+            
             TextButton(
                 onClick = {
                     navController.navigate("agenda") {

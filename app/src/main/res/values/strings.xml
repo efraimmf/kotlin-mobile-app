@@ -1,3 +1,6 @@
 <resources>
     <string name="app_name">Bandify</string>
+
+    <string name="default_web_client_id">351674972226-1hut8i6q4iv6q6cpoa5aa2b5eccaae5n.apps.googleusercontent.com</string>
+
 </resources>

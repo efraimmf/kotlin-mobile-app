@@ -1,68 +1,68 @@
 package com.pgmv.bandify.ui.screen
 
-
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
+import android.content.Context
+import android.util.Log
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.AccountCircle
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Email
-import androidx.compose.material.icons.filled.LockReset
-import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.material.icons.filled.*
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInClient
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseUser
 import com.pgmv.bandify.database.DatabaseHelper
 import com.pgmv.bandify.domain.User
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
 
 @Composable
-fun ProfileScreen(databaseHelper: DatabaseHelper, userId: Long?,navController: NavHostController) {
-    val user = remember { mutableStateOf<User?>(null) }
-    val loading = remember { mutableStateOf(true) }
+fun ProfileScreen(databaseHelper: DatabaseHelper, userId: Long?, navController: NavHostController) {
+    val auth = FirebaseAuth.getInstance()
+    val firebaseUser = auth.currentUser
+    val isGoogleLogin = firebaseUser != null
+    val context = LocalContext.current
+    val googleSignInClient = getGoogleSignInClient(context)
 
-    LaunchedEffect(userId) {
-        if (userId != null) {
-            user.value = databaseHelper.userDao().getUserById(userId)
-            loading.value = false
+    val user = remember { mutableStateOf<User?>(null) }
+    val isLoading = remember { mutableStateOf(true) }
+
+    LaunchedEffect(userId, firebaseUser) {
+        isLoading.value = true
+        if (isGoogleLogin) {
+
+            isLoading.value = false
+        } else if (userId != null) {
+
+            user.value = withContext(Dispatchers.IO) {
+                databaseHelper.userDao().getUserById(userId)
+            }
+            isLoading.value = false
         } else {
-            loading.value = true
+            isLoading.value = false
         }
     }
 
-    val userProfile = user.value
-
-    if (loading.value) {
-        Text(
-            text = "Carregando...",
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(16.dp)
-        )
-    } else if (userProfile == null) {
-        Text(
-            text = "Usuário não encontrado.",
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.padding(16.dp)
-        )
+    if (isLoading.value) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
     } else {
+        val userProfile = user.value
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -83,7 +83,8 @@ fun ProfileScreen(databaseHelper: DatabaseHelper, userId: Long?,navController: N
                 Spacer(modifier = Modifier.width(8.dp))
                 Column {
                     Text(
-                        text = userProfile.username,
+                        text = if (isGoogleLogin) firebaseUser?.displayName ?: "Usuário"
+                        else userProfile?.username ?: "Usuário",
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp,
                         color = MaterialTheme.colorScheme.primary
@@ -110,7 +111,8 @@ fun ProfileScreen(databaseHelper: DatabaseHelper, userId: Long?,navController: N
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = userProfile.phone,
+                    text = if (isGoogleLogin) firebaseUser?.phoneNumber ?: "Não informado"
+                    else userProfile?.phone ?: "Não informado",
                     fontSize = 15.sp,
                     color = MaterialTheme.colorScheme.onSecondary
                 )
@@ -130,7 +132,8 @@ fun ProfileScreen(databaseHelper: DatabaseHelper, userId: Long?,navController: N
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = userProfile.email,
+                    text = if (isGoogleLogin) firebaseUser?.email ?: "Não informado"
+                    else userProfile?.email ?: "Não informado",
                     fontSize = 15.sp,
                     color = MaterialTheme.colorScheme.onSecondary
                 )
@@ -204,28 +207,43 @@ fun ProfileScreen(databaseHelper: DatabaseHelper, userId: Long?,navController: N
 
             Row(
                 modifier = Modifier
-                    .padding(start = 20.dp, top = 120.dp)
+                    .padding(start = 30.dp, top = 120.dp)
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                TextButton(onClick = {
-                    navController.navigate("login")
-                }
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.Logout,
-                        contentDescription = "Logout Icon",
-                        tint = MaterialTheme.colorScheme.error,
-                        modifier = Modifier.size(30.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                        text = "Sair",
-                        fontSize = 20.sp,
-                        color = MaterialTheme.colorScheme.error
-                    )
+                if (auth.currentUser != null) {
+
+                        TextButton(
+                            onClick = {
+                                auth.signOut()
+                                googleSignInClient.signOut()
+                                navController.navigate("login") {
+                                    popUpTo("profile") { inclusive = true }
+                                }
+                            }
+                        ) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.Logout,
+                                contentDescription = "Logout Icon",
+                                tint = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.size(30.dp)
+                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Text(
+                                text = "Sair",
+                                fontSize = 20.sp,
+                                color = MaterialTheme.colorScheme.error
+                            )
+                        }
+
                 }
             }
+
         }
     }
 }
+
+
+
+
+
