@@ -38,13 +38,12 @@ import com.kizitonwose.calendar.core.daysOfWeek
 import com.pgmv.bandify.api.response.Holiday
 import com.pgmv.bandify.database.DatabaseHelper
 import com.pgmv.bandify.domain.Event
+import com.pgmv.bandify.ui.components.AgendaEventCard
 import com.pgmv.bandify.ui.components.Day
 import com.pgmv.bandify.ui.components.DaysOfWeekTitle
-import com.pgmv.bandify.ui.components.AgendaEventCard
 import com.pgmv.bandify.ui.components.MonthTitle
 import com.pgmv.bandify.viewmodel.AgendaViewModel
 import com.pgmv.bandify.viewmodel.AgendaViewModelFactory
-import java.time.Year
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale

@@ -11,7 +11,6 @@ import com.pgmv.bandify.api.RetrofitHelper
 import com.pgmv.bandify.api.response.Holiday
 import com.pgmv.bandify.database.DatabaseHelper
 import com.pgmv.bandify.domain.Event
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
