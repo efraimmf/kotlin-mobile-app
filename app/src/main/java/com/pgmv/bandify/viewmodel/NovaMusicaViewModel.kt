@@ -4,19 +4,29 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
+import com.pgmv.bandify.api.MusicApi
+import com.pgmv.bandify.api.RetrofitHelper
+import com.pgmv.bandify.api.response.Recording
 import com.pgmv.bandify.database.DatabaseHelper
 import com.pgmv.bandify.domain.Song
+import com.pgmv.bandify.utils.formatDuration
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class NovaMusicaViewModel(dbHelper: DatabaseHelper? = null): ViewModel() {
     private val songDao = dbHelper?.songDao()
+    private val retrofitHelper = RetrofitHelper.getInstance()
+    private val musicService = retrofitHelper.musicApi(MusicApi::class.java)
 
     var songAdded = mutableStateOf(false)
     var songTitle = mutableStateOf("")
     var artist = mutableStateOf("")
+    var duration = mutableStateOf("")
     var selectedTag = mutableStateOf("")
     var selectedTempo = mutableStateOf("")
     var selectedKey = mutableStateOf("")
+    var searchResults = mutableStateOf<List<Recording>>(emptyList())
+    private var debounceJob: kotlinx.coroutines.Job? = null
 
     val tagOptions = listOf("Ensaio", "Prontas")
     val keyOptions = listOf(
@@ -49,6 +59,40 @@ class NovaMusicaViewModel(dbHelper: DatabaseHelper? = null): ViewModel() {
         selectedKey.value = value
     }
 
+    fun searchSong(query: String) {
+        if (query.isBlank()) {
+            searchResults.value = emptyList()
+            return
+        }
+
+        debounceJob?.cancel()
+        debounceJob = viewModelScope.launch {
+            delay(500)
+
+            try {
+                val response = musicService.searchSong(query)
+                println("Search API Response: ${response.data}")
+
+                if (response.data.isNotEmpty()) {
+                    searchResults.value = response.data
+                } else {
+                    println("Nenhum resultado encontrado")
+                    searchResults.value = emptyList()
+                }
+
+            } catch (e: Exception) {
+                println("Erro ao buscar músicas: ${e.message}")
+                searchResults.value = emptyList()
+            }
+        }
+    }
+
+    fun selectSearchResult(recording: Recording) {
+        songTitle.value = recording.title
+        artist.value = recording.artist.name
+        duration.value = recording.duration.toString()
+        searchResults.value = emptyList()
+    }
 
     fun saveSong() {
         val newSong = Song(
@@ -58,7 +102,7 @@ class NovaMusicaViewModel(dbHelper: DatabaseHelper? = null): ViewModel() {
             tempo = selectedTempo.value.toInt(),
             key = selectedKey.value,
             userId = 1L,
-            duration = "4:30"
+            duration = formatDuration(duration.value.toInt())
         )
         viewModelScope.launch {
             try {

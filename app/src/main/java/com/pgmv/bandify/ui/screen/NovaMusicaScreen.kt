@@ -8,9 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MusicNote
 import androidx.compose.material3.Button
@@ -28,6 +26,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import com.pgmv.bandify.database.DatabaseHelper
 import com.pgmv.bandify.ui.components.DropdownTextField
+import com.pgmv.bandify.ui.components.SearchResultsList
 import com.pgmv.bandify.ui.components.ValidatedTextField
 import com.pgmv.bandify.ui.theme.BandifyTheme
 import com.pgmv.bandify.viewmodel.NovaMusicaViewModel
@@ -61,11 +60,13 @@ fun NovaMusicaScreen(
         modifier = Modifier
             .fillMaxSize()
             .padding(16.dp)
-            .verticalScroll(rememberScrollState())
     ) {
         ValidatedTextField(
             value = songTitle,
-            onValueChange = { viewModel.updateSongTitle(it) },
+            onValueChange = {
+                viewModel.updateSongTitle(it)
+                viewModel.searchSong(it)
+            },
             label = "Nome da Música",
             modifier = Modifier.padding(top = 12.dp),
             leadingIcon = {
@@ -73,6 +74,8 @@ fun NovaMusicaScreen(
                     contentDescription = "Música")
             }
         )
+
+        SearchResultsList(dbHelper)
 
         Row (
             modifier = Modifier
