@@ -44,4 +44,5 @@ interface FileDao {
     WHERE ef.event_id = :eventId
 """)
     suspend fun getFilesForEvent(eventId: Long): List<File>
+    abstract fun getFilesByCategory(s: String): Any?
 }

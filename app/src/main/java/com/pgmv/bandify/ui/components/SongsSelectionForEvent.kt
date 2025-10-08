@@ -31,6 +31,7 @@ fun SongsSelectionForEvent(dbHelper: DatabaseHelper, selectedSongs: MutableState
 
     Text(
         text = "Músicas do evento",
+        
         style = MaterialTheme.typography.titleLarge,
     )
     Spacer(modifier = Modifier.padding(8.dp))
